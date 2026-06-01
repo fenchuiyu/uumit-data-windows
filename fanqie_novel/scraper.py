@@ -24,7 +24,7 @@ class FanqieNovelScraper(BaseScraper):
     RANKING_API = "https://fanqienovel.com/api/ranking"
 
     def __init__(self):
-        super().__init__(cache_ttl=120)  # 2分钟缓存
+        super().__init__(cache_ttl=60)  # 1分钟缓存
 
     async def get_ranking_list(self, category: str = "hot", size: int = 50) -> dict:
         """

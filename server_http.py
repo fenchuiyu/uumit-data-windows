@@ -37,6 +37,7 @@ from starlette.responses import JSONResponse
 from kuaishou_hotsearch.scraper import KuaishouHotSearchScraper
 from fanqie_novel.scraper import FanqieNovelScraper
 from xiaohongshu_hotsearch.scraper import XiaohongshuHotSearchScraper
+from s71200_ref.instructions import get_all_categories, get_category, search_instructions, get_instruction_detail
 
 ks = KuaishouHotSearchScraper()
 fq = FanqieNovelScraper()
@@ -243,6 +244,46 @@ async def health(request):
     })
 
 
+# ═══════════════════════════════════════════════════════════
+#  S7-1200 PLC 指令参考 REST API
+# ═══════════════════════════════════════════════════════════
+
+async def s7_categories(request):
+    """获取所有指令分类"""
+    return json_response({"success": True, "platform": "S7-1200", "categories": get_all_categories()})
+
+
+async def s7_list(request):
+    """获取指定分类的指令列表"""
+    cat = request.query_params.get("cat", "")
+    if not cat:
+        return error_response("缺少 cat 参数，可用分类: " + ", ".join([c["key"] for c in get_all_categories()]))
+    data = get_category(cat)
+    if not data:
+        return error_response(f"未知分类: {cat}")
+    return json_response({"success": True, "platform": "S7-1200", **data})
+
+
+async def s7_search(request):
+    """搜索指令"""
+    keyword = request.query_params.get("keyword", "")
+    if not keyword:
+        return error_response("缺少 keyword 参数")
+    results = search_instructions(keyword)
+    return json_response({"success": True, "platform": "S7-1200", "keyword": keyword, "matched_count": len(results), "items": results})
+
+
+async def s7_detail(request):
+    """获取指令详情"""
+    name = request.query_params.get("name", "")
+    if not name:
+        return error_response("缺少 name 参数")
+    data = get_instruction_detail(name)
+    if not data:
+        return error_response(f"未找到指令: {name}")
+    return json_response({"success": True, **data})
+
+
 # ── 路由表 ────────────────────────────────────────────────
 app = Starlette(routes=[
     Route("/", endpoint=health),
@@ -264,6 +305,12 @@ app = Starlette(routes=[
     Route("/api/xiaohongshu/search",  endpoint=xhs_search,  methods=["GET"]),
     Route("/api/xiaohongshu/detail",  endpoint=xhs_detail,  methods=["GET"]),
     Route("/api/xiaohongshu/summary", endpoint=xhs_summary, methods=["GET"]),
+
+    # S7-1200 指令参考
+    Route("/api/s71200/categories", endpoint=s7_categories, methods=["GET"]),
+    Route("/api/s71200/list",       endpoint=s7_list,       methods=["GET"]),
+    Route("/api/s71200/search",     endpoint=s7_search,     methods=["GET"]),
+    Route("/api/s71200/detail",     endpoint=s7_detail,     methods=["GET"]),
 ])
 
 

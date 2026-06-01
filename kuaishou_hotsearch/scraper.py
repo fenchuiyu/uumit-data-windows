@@ -20,7 +20,7 @@ class KuaishouHotSearchScraper(BaseScraper):
     HOT_SEARCH_API = "https://www.kuaishou.com/graphql"
 
     def __init__(self):
-        super().__init__(cache_ttl=30)  # 30秒缓存，保证数据实时性
+        super().__init__(cache_ttl=15)  # 15秒缓存，更快刷新
 
     async def get_hot_search_list(self, size: int = 50) -> dict:
         """

@@ -25,7 +25,7 @@ class XiaohongshuHotSearchScraper(BaseScraper):
     SUGGEST_API = "https://www.xiaohongshu.com/api/search/suggest"
 
     def __init__(self):
-        super().__init__(cache_ttl=45)  # 45秒缓存
+        super().__init__(cache_ttl=20)  # 20秒缓存，更快刷新
 
     async def get_hot_search_list(
         self, category: str = "all", size: int = 50
